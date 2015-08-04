@@ -45,7 +45,7 @@ while(running):
     out *= 2.0
     out -= 1.0
     out.transpose()
-    play(out[0], fs=22050)
+    #play(out[0], fs=22050)
     outwav.write_frames(out[0])
 
 outwav.sync()
