@@ -27,6 +27,7 @@ frames = []
 # load brain
 
 brain = theanets.feedforward.Regressor.load("theanet.py.net.pkl")#brain-1438666035")
+#brain = theanets.feedforward.Regressor.load("brain-1438666035")
 brain._graphs = {} 
 brain._functions = {}
 outwav = scikits.audiolab.Sndfile("out.wav",mode='w',format=scikits.audiolab.Format(),channels=1,samplerate=22050)

@@ -7,6 +7,10 @@ inputs = 4096
 outputs = 735
 exp = theanets.Experiment(theanets.Regressor,layers=[4096, 1000, outputs])
 net = exp.network
+import climate
+import logging
+
+climate.enable_default_logging()
 
 
 # 4096 * n frames
@@ -29,7 +33,7 @@ valid = valid.astype(np.float32)[0:train.shape[0]]
 i = 0
 for traint, validt in net.itertrain([train, valid], 
           algo='nag',
-          learning_rate=0.1,
+          learning_rate=0.05,
           save_progress="brain-{}",
           save_every=100,
           momentum=0.9):

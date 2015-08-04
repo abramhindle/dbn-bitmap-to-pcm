@@ -9,6 +9,7 @@ import os.path
 import scipy.io
 import scipy.io.wavfile
 
+# run me to generate frames.pkl and audio.pkl
 
 if len(sys.argv) < 2:
     print "Opening vtest.avi"
