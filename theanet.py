@@ -5,7 +5,7 @@ import numpy as np
 # output samples 22050/30
 inputs = 4096
 outputs = 735
-exp = theanets.Experiment(theanets.Regressor,layers=[4096, 1000, outputs])
+exp = theanets.Experiment(theanets.Regressor,layers=[4096, 1000, 1000, 1000, outputs])
 net = exp.network
 import climate
 import logging
@@ -21,6 +21,10 @@ train = frames
 valid = audio
 train = train.astype(np.float32)
 valid = valid.astype(np.float32)[0:train.shape[0]]
+shuffleids = np.arange(train.shape[0])
+np.random.shuffle(shuffleids)
+train = train[shuffleids]
+valid = valid[shuffleids]
 #exp.train(train, valid, algo='sgd', learning_rate=1e-4, momentum=0.9)
 #exp.train([train, valid], algo='sample')
 #net.train([train, valid], algo='rprop', patience=10, batch_size=4)
@@ -30,12 +34,21 @@ valid = valid.astype(np.float32)[0:train.shape[0]]
 #          learning_rate=0.1,
 #          momentum=0.9):
 
+#i = 0
+#net.train([train, valid], 
+#          algo='nag',
+#          learning_rate=1e-4,
+#          save_progress="brain-{}",
+#          save_every=100,
+#          batch_size=4,
+#          momentum=0.9)
 i = 0
 for traint, validt in net.itertrain([train, valid], 
           algo='nag',
-          learning_rate=0.05,
+          learning_rate=1e-4,
           save_progress="brain-{}",
           save_every=100,
+          batch_size=10,
           momentum=0.9):
     print('i ',str(i))
     print('training loss:', traint['loss'])
