@@ -24,9 +24,9 @@ print ('f 101 0 %s 1 "%s" 0 4 1' % (nframes, "out.wav"))
 curframes = 0
 onesamp = 1/float(rate)
 while(curframes < nframes):
-    ntimes = int(linscale(random.random(),1,4))
+    ntimes = int(linscale(random.random(),1,20))
     for j in xrange(0,ntimes):
-        when = curframes + int(linscale(random.random(),-1*nblock, 2*nblock))
+        when = curframes + int(linscale(random.random(),-1*nblock, (j+1)*nblock))
         # print parent 
         pgrain(frames2time(when), frames2time(nblock),1.0,curframes,nblock)
         children = int(linscale(random.random(),1,20))

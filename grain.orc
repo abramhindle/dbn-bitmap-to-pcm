@@ -2,7 +2,7 @@ sr      =  44100
 ;kr      =  100
 ksmps   =  16
 nchnls  =  1
-0dbfs = 1.1
+0dbfs = 4.0
 
 /* Bartlett window */
 itmp    ftgen 1, 0, 1024, 20, 3, 1
