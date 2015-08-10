@@ -32,7 +32,7 @@ frames = []
 
 # load brain
 # cv2.namedWindow("frame", 1)
-brain = theanets.feedforward.Regressor.load("theanet.py.net.pkl")#brain-1438666035")
+brain = theanets.feedforward.Regressor.load("stft-theanet.py.net.pkl")#brain-1438666035")
 #brain = theanets.feedforward.Regressor.load("brain-1438666035")
 brain._graphs = {} 
 brain._functions = {}
@@ -79,17 +79,17 @@ while(running):
     scaled = scaled.flatten()
 
     # do 3 predictions
-    out = brain.predict([scaled])
+    out = brain.predict([scaled])[0]
     # out is the guts of a fourier transform
     # inverse fft won't work well
     buf = np.zeros(window_size).astype(complex)
-    buf[0:swin_size] = out[0,0:swin_size]
+    buf[0:swin_size] = out[0:swin_size]
     audio = scipy.real(scipy.ifft(buf))
     audio[0:overlapsize] += overlap[0:overlapsize]
     # should be a copy but whatever
-    overlap = audio[windowsize-overlapsize:windowsize]
-    outs.append(audio[0:alen)
-    outwav.write_frames(out[0])
+    overlap = audio[window_size-overlapsize:window_size]
+    outs.append(audio[0:alen])
+    outwav.write_frames(audio[0:alen])
     #k = cv2.waitKey(1) & 0xff
     #if k == 27:
     #    continue
@@ -102,19 +102,19 @@ outwav.write_frames(overlap)
 
 outwav.sync()
 
-outwav = scikits.audiolab.Sndfile("wout.wav",mode='w',format=scikits.audiolab.Format(),channels=1,samplerate=22050)
-output = np.zeros(735*(2+len(outs)))
-for i in range(0,len(outs)):
-    #audio = outs[i]*window
-    start = (i + 1)*alen
-    end = start + alen
-    rstart = start + alen/2 + (random.random() - 0.5) * (alen/10) #int(start - (alen/2) + alen*random.random())
-    rend = rstart + alen
-    output[start:end] += outs[i][0]
-    output[rstart:rend] += outs[i][1]
-    output[(rstart-alen):(rend-alen)] += outs[i][1]
-
-outwav.write_frames(output)
-outwav.sync()
-
+# outwav = scikits.audiolab.Sndfile("wout.wav",mode='w',format=scikits.audiolab.Format(),channels=1,samplerate=22050)
+# output = np.zeros(735*(2+len(outs)))
+# for i in range(0,len(outs)):
+#     #audio = outs[i]*window
+#     start = (i + 1)*alen
+#     end = start + alen
+#     rstart = start + alen/2 + (random.random() - 0.5) * (alen/10) #int(start - (alen/2) + alen*random.random())
+#     rend = rstart + alen
+#     output[start:end] += outs[i][0]
+#     output[rstart:rend] += outs[i][1]
+#     output[(rstart-alen):(rend-alen)] += outs[i][1]
+# 
+# outwav.write_frames(output)
+# outwav.sync()
+# 
 cv2.destroyAllWindows()
