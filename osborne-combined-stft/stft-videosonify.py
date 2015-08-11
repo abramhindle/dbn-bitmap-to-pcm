@@ -17,7 +17,8 @@ import scikits.audiolab
 import random
 #sd.default.samplerate = 44100
 #sd.default.channels = 1
-
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import plot, show, imshow
 
 if len(sys.argv) < 2:
     print "Opening vtest.avi"
@@ -36,7 +37,7 @@ brain = theanets.feedforward.Regressor.load("stft-theanet.py.net.pkl")#brain-143
 #brain = theanets.feedforward.Regressor.load("brain-1438666035")
 brain._graphs = {} 
 brain._functions = {}
-outwav = scikits.audiolab.Sndfile("out.wav",mode='w',format=scikits.audiolab.Format(),channels=1,samplerate=22050)
+outwav = scikits.audiolab.Sndfile("out.wav",mode='w',format=scikits.audiolab.Format(),channels=1,samplerate=30720)
 ret, frame = cap.read()
 
 #class BufferPlayer:
@@ -59,13 +60,46 @@ def gaussian_noise(inarr,mean=0.0,scale=1.0):
     return inarr + noise.reshape(inarr.shape)
 
 outs = []
-window_size = 1024
+window_size = 2048
+windowed = scipy.hanning(window_size)
 swin_size = window_size / 2 + 1
-alen = 735 # audio length
+alen = 1024 # audio length
 window = np.hanning(alen)
 frames = 0
 overlapsize = window_size - alen
 overlap = np.zeros(overlapsize)
+
+# if we have 1/4 overlap
+#   __       __
+#  /  \__   /  \__
+#     /  \__   /  \__
+#        /  \     /  \
+#0.5111111111111111111
+# 
+# flat_window = np.ones(window_size)
+# olaps = int(math.ceil((window_size - alen)/2.0))
+# flat_window[0:olaps] = np.arange(0,olaps)/float(olaps-1)
+# flat_window[window_size-olaps:window_size] = 1.0 - flat_window[0:olaps]
+
+
+# if we have 1/2 overlap
+#
+#  /\  /\
+#   /\/\/\
+#    /\  /\
+#0.51111110.5
+
+flat_window = np.ones(window_size)
+olaps = int(math.ceil((window_size - alen))) # half
+flat_window[0:olaps] = np.arange(0,olaps)
+flat_window[olaps:window_size] = np.arange(0,olaps)[::-1]
+flat_window /= float(olaps-1)
+
+# debug
+outwav.write_frames(windowed)
+last_phase = np.zeros(window_size)
+invwindow = 1.0/scipy.hamming(window_size)
+amax=1e-9
 while(running):
     ret, frame = cap.read()
     if (not ret):
@@ -83,13 +117,26 @@ while(running):
     # out is the guts of a fourier transform
     # inverse fft won't work well
     buf = np.zeros(window_size).astype(complex)
-    buf[0:swin_size] = out[0:swin_size]
-    audio = scipy.real(scipy.ifft(buf))/(windowed+1e-4)
-    audio[0:overlapsize] += overlap[0:overlapsize]
+    buf[0:swin_size] += out[0:swin_size]
+    # mirror around
+    buf[swin_size:window_size] += buf[0:swin_size-2][::-1]
+    # add some phase
+    #buf[0:swin_size] += np.zeros(swin_size).astype(complex)*last_phase[0:swin_size]
+    #audio = scipy.real(scipy.ifft(buf)) * windowed
+    # audio = np.zeros(window_size) * windowed
+    audio = windowed * scipy.real(scipy.ifft(buf))*invwindow
+    #last_phase = scipy.imag(scipy.fft(audio))
+    audio[0:olaps] += overlap[0:olaps]
     # should be a copy but whatever
-    overlap = audio[window_size-overlapsize:window_size]
-    outs.append(audio[0:alen])
-    outwav.write_frames(audio[0:alen])
+    overlap[0:olaps] *= 0
+    overlap[0:olaps] += audio[window_size-olaps:window_size]
+    #outs.append(audio[0:alen])
+    #outwav.write_frames(audio[0:alen])
+    amax = max(audio.max(), amax)
+    outwav.write_frames(audio[0:olaps]/amax)
+    #outwav.write_frames(audio/(0.001+audio.max()))
+    #outwav.write_frames(np.zeros(2048))
+
     #k = cv2.waitKey(1) & 0xff
     #if k == 27:
     #    continue
