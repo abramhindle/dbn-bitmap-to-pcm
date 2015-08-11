@@ -157,6 +157,11 @@ while(running):
 
 outwav.write_frames(overlap)
 
+#idea
+# for each frame generate interpolate spectra
+# for each frame run 1024 sinusoids and sum them manually but maintain phase?
+# invent a phase vector that we add to each time to ensure that the next window has appropriate phase?
+
 
 outwav.sync()
 
