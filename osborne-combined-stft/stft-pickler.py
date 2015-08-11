@@ -58,8 +58,8 @@ norm.resize(samples*nsamples)
 # window_size it'll just add a buncha zeros anyways
 norm.resize((window_size+1)*math.ceil(len(norm)/float(window_size)))
 # we're dumping phase 
-ffts = np.array([scipy.real(scipy.fft(norm[i*samples:i*samples+window_size] * windowed))[0:swin_size] for i in range(0,nsamples)])
-#ffts = np.array([scipy.real(scipy.fft(norm[i*samples:i*samples+window_size]))[0:swin_size] for i in range(0,nsamples)])
+# ffts = np.array([scipy.real(scipy.fft(norm[i*samples:i*samples+window_size] * windowed))[0:swin_size] for i in range(0,nsamples)])
+ffts = np.array([scipy.real(scipy.fft(norm[i*samples:i*samples+window_size]))[0:swin_size] for i in range(0,nsamples)])
 # keep 0s 0
 ffts = ffts/max(fabs(ffts.max()),fabs(ffts.min()))
 pickle.dump(ffts, file('stft.pkl','wb'))

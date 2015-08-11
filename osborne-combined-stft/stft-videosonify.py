@@ -99,7 +99,10 @@ flat_window /= float(olaps-1)
 outwav.write_frames(windowed)
 last_phase = np.zeros(window_size)
 invwindow = 1.0/scipy.hamming(window_size)
-amax=1e-9
+amax=0.00285
+
+cones = np.zeros(swin_size-1).astype(complex) + complex(0,1)
+
 while(running):
     ret, frame = cap.read()
     if (not ret):
@@ -118,23 +121,31 @@ while(running):
     # inverse fft won't work well
     buf = np.zeros(window_size).astype(complex)
     buf[0:swin_size] += out[0:swin_size]
-    # mirror around
-    buf[swin_size:window_size] += buf[0:swin_size-2][::-1]
+
     # add some phase
-    #buf[0:swin_size] += np.zeros(swin_size).astype(complex)*last_phase[0:swin_size]
-    #audio = scipy.real(scipy.ifft(buf)) * windowed
+    #buf[1:swin_size] += cones*last_phase[1:swin_size]*0.5
+    #buf[1:swin_size] += cones*np.pi
+    #buf[1:swin_size] += cones*np.random.uniform(-np.pi/16,np.pi/16,swin_size-1)
+    buf[1:swin_size] += cones*np.random.uniform(-0.01,0.01,swin_size-1)
+    # mirror around
+    buf[swin_size:window_size] += buf[1:swin_size-1][::-1]
+    
+    
+    # audio = scipy.real(scipy.ifft(buf)) * windowed
+    audio = scipy.real(scipy.ifft(buf))
     # audio = np.zeros(window_size) * windowed
-    audio = windowed * scipy.real(scipy.ifft(buf))*invwindow
-    #last_phase = scipy.imag(scipy.fft(audio))
+    #audio = scipy.real(scipy.ifft(buf)) 
+    last_phase = scipy.imag(scipy.fft(audio))
+
+    amax = max(audio.max(), amax)
+    
     audio[0:olaps] += overlap[0:olaps]
-    # should be a copy but whatever
+    ## should be a copy but whatever
     overlap[0:olaps] *= 0
     overlap[0:olaps] += audio[window_size-olaps:window_size]
-    #outs.append(audio[0:alen])
-    #outwav.write_frames(audio[0:alen])
-    amax = max(audio.max(), amax)
     outwav.write_frames(audio[0:olaps]/amax)
-    #outwav.write_frames(audio/(0.001+audio.max()))
+
+    #outwav.write_frames(audio/amax)
     #outwav.write_frames(np.zeros(2048))
 
     #k = cv2.waitKey(1) & 0xff
@@ -142,7 +153,7 @@ while(running):
     #    continue
     frames += 1
     if frames % 30 == 0:
-        print frames
+        print (frames, amax)
 
 outwav.write_frames(overlap)
 
