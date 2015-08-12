@@ -102,12 +102,21 @@ last_phase = np.zeros(window_size)
 invwindow = 1.0/scipy.hamming(window_size)
 amax=7e-3
 
+# Exp001: init all phase @ pi/2 + static phase of np.pi/100.0 windowed
+#       [X] 30hz :( [ ] aesthetic [X] Robot
+# Exp002: init all phase @ pi/2 + static phase of np.pi/10.0 windowed
+#       [X] 30hz :( [ ] aesthetic [X] Robot
+# Exp003: init all phase @ pi/2 + static phase of var np.pi/2.0 normally distributed windows
+#       [X] 30hz :( [ ] aesthetic [X] Robot
+
+
+
 cones = np.zeros(swin_size-1).astype(complex) + complex(0,1)
 oldout = np.zeros(swin_size)
 
 phase = np.ones(window_size)*np.pi/2.0
 # phase       = np.random.normal(np.pi/2,np.pi,window_size)
-staticphase = np.ones(window_size)*np.pi/100.0
+staticphase = np.random.normal(0,np.pi/2.0,window_size)
 
 #phase = np.zeros(window_size)
 
