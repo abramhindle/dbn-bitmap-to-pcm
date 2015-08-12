@@ -69,6 +69,24 @@ frames = 0
 overlapsize = window_size - alen
 overlap = np.zeros(overlapsize)
 
+# crazy phase stuff
+
+wav = scipy.io.wavfile.read("steal-phase.wav")
+wavdata = wav[1].astype(np.float32)
+norm = (wavdata)/(2.0**15)
+# pad norm with zeros
+samples = alen
+nsamples = int(math.ceil(len(norm)/float(samples)))
+norm.resize(samples*nsamples)
+# the +1 is because there's no good relationship between samples and
+# window_size it'll just add a buncha zeros anyways
+norm.resize((window_size+1)*math.ceil(len(norm)/float(window_size)))
+phases = np.array([np.angle(scipy.fft(norm[i*samples:i*samples+window_size])) for i in range(0,nsamples)])
+phases = phases[0:phases.shape[0]-1]
+
+# 
+
+
 # if we have 1/4 overlap
 #   __       __
 #  /  \__   /  \__
@@ -125,11 +143,13 @@ amax=7e-3
 #       [X] 30hz :( [ ] aesthetic [X] Robot [ ] Pulsing
 # Exp011: init normals -pi/2 to pi/2 + random_normals pi/10 recursive
 #       [ ] 30hz :( [ ] aesthetic [X] Robot [ ] Pulsing
+# Exp012: get phase from another sound file
+#       [ ] 30hz :( [ ] aesthetic [ ] Robot [ ] Pulsing
 
 cones = np.zeros(swin_size-1).astype(complex) + complex(0,1)
 oldout = np.zeros(swin_size)
 
-phase = np.random.normal(0,np.pi/2, window_size)
+phase = np.zeros(window_size) #np.random.normal(0,np.pi/2, window_size)
 # phase       = np.random.normal(np.pi/2,np.pi,window_size)
 # staticphase = np.random.normal(0,np.pi/2.0,window_size)
 staticphase = np.ones(window_size).astype(float32)*np.pi/2.0
@@ -138,7 +158,7 @@ staticphase = np.ones(window_size).astype(float32)*np.pi/2.0
 
 dooverlaps = True
 dowindowing = True
-
+phasei=0
 while(running):
     ret, frame = cap.read()
     if (not ret):
@@ -162,7 +182,9 @@ while(running):
     # buf[swin_size:window_size] += -1*buf[1:swin_size-1][::-1]
     
     # make phase
-    phase += np.random.normal(0,np.pi/10,window_size)
+    phase = phases[phasei % phases.shape[0]]
+    phasei += 1
+    # phase += np.random.normal(0,np.pi/10,window_size)
     myfft = buf * exp(complex(0,1) * phase)
     
     audio = scipy.real(scipy.ifft(myfft))
