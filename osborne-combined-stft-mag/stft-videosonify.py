@@ -61,7 +61,8 @@ def gaussian_noise(inarr,mean=0.0,scale=1.0):
 
 outs = []
 window_size = 2048
-windowed = scipy.hanning(window_size)
+#windowed = scipy.hanning(window_size)
+windowed = scipy.hamming(window_size)
 swin_size = window_size / 2 + 1
 alen = 1024 # audio length
 window = np.hanning(alen)
@@ -94,11 +95,6 @@ phases = phases[0:phases.shape[0]-1]
 #        /  \     /  \
 #0.5111111111111111111
 # 
-# flat_window = np.ones(window_size)
-# olaps = int(math.ceil((window_size - alen)/2.0))
-# flat_window[0:olaps] = np.arange(0,olaps)/float(olaps-1)
-# flat_window[window_size-olaps:window_size] = 1.0 - flat_window[0:olaps]
-
 
 # if we have 1/2 overlap
 #
@@ -144,7 +140,7 @@ amax=7e-3
 # Exp011: init normals -pi/2 to pi/2 + random_normals pi/10 recursive
 #       [ ] 30hz :( [ ] aesthetic [X] Robot [ ] Pulsing
 # Exp012: get phase from another sound file
-#       [ ] 30hz :( [ ] aesthetic [ ] Robot [ ] Pulsing
+#       [ ] 30hz :( [X] aesthetic [X] Robot [ ] Pulsing
 
 cones = np.zeros(swin_size-1).astype(complex) + complex(0,1)
 oldout = np.zeros(swin_size)
