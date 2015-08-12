@@ -111,15 +111,17 @@ amax=7e-3
 # Exp004: init all phase @ pi/2 + static phase of var np.pi/10.0 normally distributed windows
 #       [X] 30hz :( [ ] aesthetic [X] Robot [ ] Pulsing
 # Exp005: init all phase @ pi/2 + static phase of var np.pi normally distributed windows
-#       [X] 30hz :( [ ] aesthetic [X] Robot [ ] Pulsing
+#       [X] 30hz :( [ ] aesthetic [X] Robot [ ] Pulsing [X] White Noisey
+# Exp006: init all phase @ 0 + static phase of var np.pi/2.0 normally distributed windows
+#       [X] 30hz :( [X] aesthetic [ ] Robot [X] Pulsing
 
 
 cones = np.zeros(swin_size-1).astype(complex) + complex(0,1)
 oldout = np.zeros(swin_size)
 
-phase = np.ones(window_size)*np.pi/2.0
+phase = np.zeros(window_size)*np.pi/2.0
 # phase       = np.random.normal(np.pi/2,np.pi,window_size)
-staticphase = np.random.normal(0,np.pi,window_size)
+staticphase = np.random.normal(0,np.pi/2.0,window_size)
 
 #phase = np.zeros(window_size)
 
