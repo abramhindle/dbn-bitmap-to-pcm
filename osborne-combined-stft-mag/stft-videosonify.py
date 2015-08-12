@@ -96,12 +96,24 @@ flat_window[olaps:window_size] = np.arange(0,olaps)[::-1]
 flat_window /= float(olaps-1)
 
 # debug
-outwav.write_frames(windowed)
+# outwav.write_frames(windowed)
+
 last_phase = np.zeros(window_size)
 invwindow = 1.0/scipy.hamming(window_size)
-amax=0.00285
+amax=7e-3
 
 cones = np.zeros(swin_size-1).astype(complex) + complex(0,1)
+oldout = np.zeros(swin_size)
+
+staticphase = complex(0.0,1.0)*np.random.uniform(-np.pi,np.pi,window_size)
+#staticphase = complex(0.0,1.0)*np.random.uniform(-1.0*np.pi/2,np.pi/2,window_size)
+# staticphase[0] = 0
+# staticphase = complex(0.0,1.0)*np.pi/2.0
+#staticphase = np.ones(window_size)*np.pi/2.0
+
+
+dooverlaps = True
+dowindowing = False
 
 while(running):
     ret, frame = cap.read()
@@ -116,7 +128,11 @@ while(running):
     scaled = scaled.flatten()
 
     # do 3 predictions
-    out = brain.predict([scaled])[0]
+    out = brain.predict([gaussian_noise(scaled,0.0,0.01).astype(np.float32)])[0]
+    #out = brain.predict([scaled])[0]
+    # print sum(out-oldout)
+    oldout = out
+
     # out is the guts of a fourier transform
     # inverse fft won't work well
     buf = np.zeros(window_size).astype(complex)
@@ -126,28 +142,45 @@ while(running):
     #buf[1:swin_size] += cones*last_phase[1:swin_size]
     #buf[1:swin_size] += cones*np.pi
     #buf[1:swin_size] += cones*np.random.uniform(-np.pi/16,np.pi/16,swin_size-1)
-    # buf[1:swin_size] += cones*np.random.uniform(-0.02,0.02,swin_size-1)
+    #buf[1:swin_size] += cones*np.random.uniform(-0.02,0.02,swin_size-1)
     # mirror around
-    # buf[swin_size:window_size] += buf[1:swin_size-1][::-1]
+    # buf[swin_size:window_size] += -1*buf[1:swin_size-1][::-1]
     # phase on the other size is opposite
-    # buf[swin_size:window_size] *= -1*cones[0:swin_size-2]
+    #buf[swin_size:window_size] *= -1*cones[0:swin_size-2]
+    
+    # make phase
+    # phase = np.random.uniform(-np.pi/16,np.pi/16,window_size)
+    #phase = 0.1 * np.random.uniform(0,np.pi*2,window_size) + 0.9 * last_phase
+    # this works ok because it starts and ends on zero
+    #phase = np.ones(window_size) * complex(0,1) * np.pi/2.0 
+    #phase[0] = complex(0.0,0.0)
+    phase = 0.5*staticphase + 0.5*complex(0.0,1.0)*np.random.uniform(-np.pi,np.pi,window_size)
+    #phase = staticphase*0.9 + last_phase*0.05 + np.random.uniform(-np.pi/16,np.pi/16,window_size)*0.05
+    #buf[0:10] = complex(0.0,0.0)*np.zeros(10)
+    myfft = buf * exp(complex(0,1) * phase)
     
     # audio = scipy.real(scipy.ifft(buf)) * windowed
-    audio = scipy.real(scipy.ifft(buf))
+    # audio = scipy.real(scipy.ifft(buf))
+    audio = scipy.real(scipy.ifft(myfft))
+    if (dowindowing):
+        audio *= flat_window # windowed 
+        
     # audio = np.zeros(window_size) * windowed
     #audio = scipy.real(scipy.ifft(buf)) 
-    last_phase = scipy.imag(scipy.fft(audio))
+    # last_phase = scipy.imag(scipy.fft(audio))
+    last_phase = np.angle(scipy.fft(audio))
 
     amax = max(audio.max(), amax)
-    
-    audio[0:olaps] += overlap[0:olaps]
-    ## should be a copy but whatever
-    overlap[0:olaps] *= 0
-    overlap[0:olaps] += audio[window_size-olaps:window_size]
-    outwav.write_frames(audio[0:olaps]/amax)
 
-    #outwav.write_frames(audio/amax)
-    #outwav.write_frames(np.zeros(2048))
+    if (dooverlaps):
+        audio[0:olaps] += overlap[0:olaps]
+        ## should be a copy but whatever
+        overlap[0:olaps] *= 0
+        overlap[0:olaps] += audio[window_size-olaps:window_size]
+        outwav.write_frames(audio[0:olaps]/amax)
+    else:
+        outwav.write_frames(audio/amax)
+        #outwav.write_frames(windowed)
 
     #k = cv2.waitKey(1) & 0xff
     #if k == 27:
