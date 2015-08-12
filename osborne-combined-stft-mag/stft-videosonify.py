@@ -118,15 +118,21 @@ amax=7e-3
 #       [X] 30hz :( [ ] aesthetic [ ] Robot [X] Pulsing
 #       more noisey
 # Exp008: init all phase @ pi/2 + static phase of 0 to pi/2
-#       [ ] 30hz :( [ ] aesthetic [ ] Robot [ ] Pulsing
+#       [X] 30hz :( [ ] aesthetic [ ] Robot [ ] Pulsing
+# Exp009: init all phase @ pi/2 + static phase of pi/2 to 0
+#       [X] 30hz :( [ ] aesthetic [ ] Robot [ ] Pulsing
+# Exp010: init normals -pi/2 to pi/2 + static phase of pi/2
+#       [X] 30hz :( [ ] aesthetic [X] Robot [ ] Pulsing
+# Exp011: init normals -pi/2 to pi/2 + random_normals pi/10 recursive
+#       [ ] 30hz :( [ ] aesthetic [X] Robot [ ] Pulsing
 
 cones = np.zeros(swin_size-1).astype(complex) + complex(0,1)
 oldout = np.zeros(swin_size)
 
-phase = np.ones(window_size)*np.pi/2.0
+phase = np.random.normal(0,np.pi/2, window_size)
 # phase       = np.random.normal(np.pi/2,np.pi,window_size)
 # staticphase = np.random.normal(0,np.pi/2.0,window_size)
-staticphase = np.pi/2.0*np.arange(0,window_size).astype(np.float32)/float(window_size)
+staticphase = np.ones(window_size).astype(float32)*np.pi/2.0
 
 #phase = np.zeros(window_size)
 
@@ -156,7 +162,7 @@ while(running):
     # buf[swin_size:window_size] += -1*buf[1:swin_size-1][::-1]
     
     # make phase
-    phase += staticphase
+    phase += np.random.normal(0,np.pi/10,window_size)
     myfft = buf * exp(complex(0,1) * phase)
     
     audio = scipy.real(scipy.ifft(myfft))
