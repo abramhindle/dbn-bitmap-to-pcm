@@ -106,8 +106,8 @@ cones = np.zeros(swin_size-1).astype(complex) + complex(0,1)
 oldout = np.zeros(swin_size)
 
 # staticphase = np.ones(window_size)*np.pi/2.0
-phase = np.random.normal(0,np.pi,window_size)
-staticphase = np.random.normal(0,np.pi,window_size)
+phase       = np.random.normal(np.pi/2,np.pi,window_size)
+staticphase = np.random.normal(0,np.pi/10,window_size)
 
 #phase = np.zeros(window_size)
 
@@ -137,7 +137,7 @@ while(running):
     # buf[swin_size:window_size] += -1*buf[1:swin_size-1][::-1]
     
     # make phase
-    phase += np.random.normal(0,np.pi/10.0,window_size)
+    phase += staticphase
     myfft = buf * exp(complex(0,1) * phase)
     
     audio = scipy.real(scipy.ifft(myfft))
