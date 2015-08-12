@@ -110,7 +110,7 @@ staticphase = complex(0.0,1.0)*np.random.uniform(-np.pi,np.pi,window_size)
 # staticphase[0] = 0
 # staticphase = complex(0.0,1.0)*np.pi/2.0
 #staticphase = np.ones(window_size)*np.pi/2.0
-
+phase = np.ones(window_size)*np.pi/2.0
 
 dooverlaps = True
 dowindowing = True
@@ -155,7 +155,9 @@ while(running):
     #phase = np.ones(window_size) * complex(0,1) * np.pi/2.0 
     #phase[0] = complex(0.0,0.0)
     # phase = 0.5*staticphase + 0.5*complex(0.0,1.0)*np.random.uniform(-np.pi,np.pi,window_size)
-    phase = complex(0.0,1.0)*np.random.uniform(-np.pi,np.pi,window_size)
+    # sounds too random
+    #phase = complex(0.0,1.0)*np.random.uniform(-np.pi,np.pi,window_size)
+    phase = phase*0.5 + 0.5*complex(0.0,1.0)*np.random.uniform(-np.pi/2.0,np.pi/2.0,window_size)
     # phase = staticphase*np.random.uniform(-0.01,0.01,1)
     #phase = staticphase*0.9 + last_phase*0.05 + np.random.uniform(-np.pi/16,np.pi/16,window_size)*0.05
     #buf[0:10] = complex(0.0,0.0)*np.zeros(10)
