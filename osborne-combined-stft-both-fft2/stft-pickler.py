@@ -32,9 +32,11 @@ while(running):
     scaled = cv2.resize(grey, (64,64))
     scaled = scaled.astype(np.float32)
     scaled /= 255.0
-    frames.append( scaled.flatten() )
+    # mag of fft2 of frame
+    fftframe = np.absolute(np.fft.fft2(scaled)).flatten()
+    frames.append( fftframe )
         
-pickle.dump(np.array(frames), file('frames.pkl','wb'))
+pickle.dump(np.array(frames), file('fft-frames.pkl','wb'))
 
 # let's do a nasty trick
 if not os.path.isfile("vtest.wav"):
@@ -60,12 +62,10 @@ norm.resize((window_size+1)*math.ceil(len(norm)/float(window_size)))
 # we're dumping phase 
 # ffts = np.array([scipy.real(scipy.fft(norm[i*samples:i*samples+window_size] * windowed))[0:swin_size] for i in range(0,nsamples)])
 # changed this to magnitude!
-ffts = np.array([np.absolute(scipy.fft(norm[i*samples:i*samples+window_size]))[0:swin_size] for i in range(0,nsamples)])
-
-# get all phase
-# ffts = np.array([np.angle(scipy.fft(norm[i*samples:i*samples+window_size]))[0:swin_size] for i in range(0,nsamples)])
-
-
+mags = np.array([np.absolute(scipy.fft(norm[i*samples:i*samples+window_size]))[0:swin_size] for i in range(0,nsamples)])
+phases = np.array([np.angle(scipy.fft(norm[i*samples:i*samples+window_size]))[0:swin_size] for i in range(0,nsamples)])
 # keep 0s 0
-ffts = ffts/max(fabs(ffts.max()),fabs(ffts.min()))
+mags = mags/max(fabs(mags.max()),fabs(mags.min()))
+phases = phases/max(fabs(phases.max()),fabs(phases.min()))
+ffts = np.hstack((mags,phases))
 pickle.dump(ffts, file('stft.pkl','wb'))
