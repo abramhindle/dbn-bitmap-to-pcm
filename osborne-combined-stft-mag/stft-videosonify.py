@@ -105,12 +105,11 @@ amax=7e-3
 cones = np.zeros(swin_size-1).astype(complex) + complex(0,1)
 oldout = np.zeros(swin_size)
 
-staticphase = complex(0.0,1.0)*np.random.uniform(-np.pi,np.pi,window_size)
-#staticphase = complex(0.0,1.0)*np.random.uniform(-1.0*np.pi/2,np.pi/2,window_size)
-# staticphase[0] = 0
-# staticphase = complex(0.0,1.0)*np.pi/2.0
-#staticphase = np.ones(window_size)*np.pi/2.0
-phase = np.ones(window_size)*np.pi/2.0
+# staticphase = np.ones(window_size)*np.pi/2.0
+phase = np.random.normal(0,np.pi,window_size)
+staticphase = np.random.normal(0,np.pi,window_size)
+
+#phase = np.zeros(window_size)
 
 dooverlaps = True
 dowindowing = True
@@ -127,53 +126,24 @@ while(running):
     scaled /= 255.0
     scaled = scaled.flatten()
 
-    # do 3 predictions
-    out = brain.predict([gaussian_noise(scaled,0.0,0.01).astype(np.float32)])[0]
-    #out = brain.predict([scaled])[0]
-    # print sum(out-oldout)
-    oldout = out
+    out = brain.predict([scaled])[0]
 
     # out is the guts of a fourier transform
     # inverse fft won't work well
     buf = np.zeros(window_size).astype(complex)
     buf[0:swin_size] += out[0:swin_size]
 
-    # add some phase
-    #buf[1:swin_size] += cones*last_phase[1:swin_size]
-    #buf[1:swin_size] += cones*np.pi
-    #buf[1:swin_size] += cones*np.random.uniform(-np.pi/16,np.pi/16,swin_size-1)
-    #buf[1:swin_size] += cones*np.random.uniform(-0.02,0.02,swin_size-1)
     # mirror around
     # buf[swin_size:window_size] += -1*buf[1:swin_size-1][::-1]
-    # phase on the other size is opposite
-    #buf[swin_size:window_size] *= -1*cones[0:swin_size-2]
     
     # make phase
-    # phase = np.random.uniform(-np.pi/16,np.pi/16,window_size)
-    #phase = 0.1 * np.random.uniform(0,np.pi*2,window_size) + 0.9 * last_phase
-    # this works ok because it starts and ends on zero
-    #phase = np.ones(window_size) * complex(0,1) * np.pi/2.0 
-    #phase[0] = complex(0.0,0.0)
-    # sounds ok but still too random
-    phase = 0.5*staticphase + 0.1*complex(0.0,1.0)*np.random.uniform(-np.pi,np.pi,window_size) + 0.4*phase    
-    #phase = 0.5*staticphase + 0.1*complex(0.0,1.0)*np.random.uniform(-np.pi,np.pi,window_size) + 0.4*phase
-    # sounds too random
-    #phase = complex(0.0,1.0)*np.random.uniform(-np.pi,np.pi,window_size)
-    # phase = phase*0.5 + 0.5*complex(0.0,1.0)*np.random.uniform(-np.pi/2.0,np.pi/2.0,window_size)
-    # phase = staticphase*np.random.uniform(-0.01,0.01,1)
-    #phase = staticphase*0.9 + last_phase*0.05 + np.random.uniform(-np.pi/16,np.pi/16,window_size)*0.05
-    #buf[0:10] = complex(0.0,0.0)*np.zeros(10)
+    phase += np.random.normal(0,np.pi/10.0,window_size)
     myfft = buf * exp(complex(0,1) * phase)
     
-    # audio = scipy.real(scipy.ifft(buf)) * windowed
-    # audio = scipy.real(scipy.ifft(buf))
     audio = scipy.real(scipy.ifft(myfft))
     if (dowindowing):
         audio *= windowed 
         
-    # audio = np.zeros(window_size) * windowed
-    #audio = scipy.real(scipy.ifft(buf)) 
-    # last_phase = scipy.imag(scipy.fft(audio))
     last_phase = np.angle(scipy.fft(audio))
 
     amax = max(audio.max(), amax)
