@@ -105,9 +105,9 @@ amax=7e-3
 cones = np.zeros(swin_size-1).astype(complex) + complex(0,1)
 oldout = np.zeros(swin_size)
 
-# staticphase = np.ones(window_size)*np.pi/2.0
-phase       = np.random.normal(np.pi/2,np.pi,window_size)
-staticphase = np.random.normal(0,np.pi/10,window_size)
+phase = np.ones(window_size)*np.pi/2.0
+# phase       = np.random.normal(np.pi/2,np.pi,window_size)
+staticphase = np.zeros(window_size)*np.pi/100.0
 
 #phase = np.zeros(window_size)
 
