@@ -172,8 +172,8 @@ while(running):
     # out is the guts of a fourier transform
     # inverse fft won't work well
     buf = np.zeros(window_size).astype(complex)
-    buf[0:swin_size] += out[0:swin_size]
-    phase[0:swin_size] = out[swin_size:swin_size+swin_size]*np.pi/2.0
+    buf[0:swin_size] += 500.0*np.abs(out[0:swin_size])
+    phase[0:swin_size] = out[swin_size:swin_size+swin_size]*np.pi
     # mirror around
     # buf[swin_size:window_size] += -1*buf[1:swin_size-1][::-1]
     

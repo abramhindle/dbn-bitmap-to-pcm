@@ -24,6 +24,11 @@ if os.path.isfile("current_brain.pkl"):
     net = pickle.load(file("current_brain.pkl"))
     net._functions = {}
     net._graphs = {}
+#elif os.path.isfile("current_pre_brain.pkl"):
+#    logging.info("loading existing pre brain")
+#    net = pickle.load(file("current_pre_brain.pkl"))
+#    net._functions = {}
+#    net._graphs = {}
 
 logging.info("Read frames.pkl")
 frames = pickle.load(file('fft-frames.pkl'))
@@ -39,27 +44,29 @@ train = train[shuffleids]
 outputs = outputs[shuffleids]
 i = 0
 logging.info("Pretraining")
-for traint, validt in net.itertrain([train, outputs], 
-          learning_rate=1e-4,
+#for traint, validt in net.train([train, outputs], 
+net.train([train, outputs], 
+          learning_rate=1e-3,
           save_progress="current_pre_brain.pkl",
           save_every=4,
           batch_size=100,
-          patience = 0,
+          train_batches=100,
+          num_updates=100,
+          patience = 1,
+          min_improvement = 0.1,
           algo='layerwise',
-          momentum=0.9):
-    print('pretrain i ',str(i))
-    print('training loss:', traint['loss'])
-    print('most recent validation loss:', validt['loss'])
-    print('training err:', traint['err'])
-    print('most recent validation err:', validt['err'])
-    i += 1
-    if (i > 10):
-        break
+          momentum=0.9)
+#    print('pretrain i ',str(i))
+#    print('training loss:', traint['loss'])
+#    print('most recent validation loss:', validt['loss'])
+#    print('training err:', traint['err'])
+#    print('most recent validation err:', validt['err'])
+#    i += 1
 
 i = 0
 for traint, validt in net.itertrain([train, outputs], 
           algo='nag',
-          learning_rate=1e-4,
+          learning_rate=1e-3,
           save_progress="current_brain.pkl",
           save_every=4,
           batch_size=100,

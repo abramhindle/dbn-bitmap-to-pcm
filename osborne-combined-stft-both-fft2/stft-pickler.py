@@ -36,7 +36,7 @@ while(running):
     fftframe = np.absolute(np.fft.fft2(scaled)).flatten()
     frames.append( fftframe )
         
-pickle.dump(np.array(frames), file('fft-frames.pkl','wb'))
+pickle.dump(np.array(frames)/frames.max(), file('fft-frames.pkl','wb'))
 
 # let's do a nasty trick
 if not os.path.isfile("vtest.wav"):

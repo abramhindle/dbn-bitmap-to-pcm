@@ -114,7 +114,7 @@ flat_window /= float(olaps-1)
 
 last_phase = np.zeros(window_size)
 invwindow = 1.0/scipy.hamming(window_size)
-amax=7e-3
+amax=0.5
 
 # Exp001: init all phase @ pi/2 + static phase of np.pi/100.0 windowed
 #       [X] 30hz :( [ ] aesthetic [X] Robot
@@ -171,14 +171,15 @@ while(running):
 
     # out is the guts of a fourier transform
     # inverse fft won't work well
-    buf = np.zeros(window_size).astype(complex)
-    buf[0:swin_size] += out[0:swin_size]
+    buf = np.zeros(window_size)
+    # mag only positive!
+    buf[0:swin_size] += 500*np.abs(out[0:swin_size])
 
     # mirror around
     # buf[swin_size:window_size] += -1*buf[1:swin_size-1][::-1]
     
     # make phase
-    phase = phases[phasei % phases.shape[0]]
+    phase = phases[phasei % (phases.shape[0]-2)]
     phasei += 1
     # phase += np.random.normal(0,np.pi/10,window_size)
     myfft = buf * exp(complex(0,1) * phase)
